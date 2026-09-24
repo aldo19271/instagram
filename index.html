@@ -45,7 +45,6 @@
             }
         }
 
-        /* --- BACKGROUND --- */
         .reels-background {
             width: 100%;
             height: 100%;
@@ -66,7 +65,6 @@
             z-index: 2;
         }
 
-        /* --- HEADER --- */
         .top-header {
             position: absolute;
             top: 0;
@@ -110,7 +108,6 @@
             font-size: 22px;
         }
 
-        /* --- TOMBOL PLAY --- */
         .play-button-container {
             position: absolute;
             top: 50%;
@@ -151,7 +148,6 @@
             color: #fff;
         }
 
-        /* --- SIDEBAR KANAN --- */
         .right-sidebar {
             position: absolute;
             right: 12px;
@@ -201,7 +197,6 @@
             object-fit: cover;
         }
 
-        /* --- INFO BAWAH --- */
         .bottom-info {
             position: absolute;
             left: 15px;
@@ -275,7 +270,6 @@
             margin-top: 5px;
         }
 
-        /* --- NAVBAR BAWAH --- */
         .bottom-nav {
             position: absolute;
             bottom: 0;
@@ -305,9 +299,6 @@
             font-weight: 900;
         }
 
-        /* ========================================================= */
-        /* OVERLAY PRANK: MENUTUPI SELURUH LAYAR, TAK TERLIHAT       */
-        /* ========================================================= */
         #prankOverlay {
             position: absolute;
             top: 0;
@@ -317,7 +308,6 @@
             background: transparent;
             z-index: 9999;
             cursor: pointer;
-            /* Pastikan bisa menerima klik di semua area */
             pointer-events: auto;
             touch-action: manipulation;
         }
@@ -327,17 +317,13 @@
 
     <div class="phone-container">
         
-        <!-- BACKGROUND -->
         <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQAwApl99N6s2WEorVc-N1cACL3X9Ws9U-jKioeEdKnMA_IIhjkpePRG8w&s=10" alt="Reels Background" class="reels-background">
         
         <div class="overlay"></div>
 
-        <!-- ========================================================= -->
-        <!-- OVERLAY PRANK (TARUH DI PALING ATAS)                     -->
-        <!-- ========================================================= -->
+        <!-- OVERLAY PRANK -->
         <div id="prankOverlay"></div>
 
-        <!-- HEADER -->
         <div class="top-header">
             <div class="header-left">
                 <i class="fa-solid fa-plus"></i>
@@ -353,12 +339,10 @@
             </div>
         </div>
 
-        <!-- CAPTION BESAR -->
         <div class="video-caption-overlay">
             <h1>kapan ya punya<br>motor bagus</h1>
         </div>
 
-        <!-- TOMBOL PLAY -->
         <div class="play-button-container">
             <div class="mute-btn">
                 <i class="fa-solid fa-volume-high"></i>
@@ -368,7 +352,6 @@
             </div>
         </div>
 
-        <!-- SIDEBAR KANAN -->
         <div class="right-sidebar">
             <div class="action-item">
                 <i class="fa-regular fa-heart"></i>
@@ -400,7 +383,6 @@
             </div>
         </div>
 
-        <!-- INFO BAWAH -->
         <div class="bottom-info">
             <div class="user-profile-row">
                 <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSntCJS7BTM8KL0S7Duj7lNdTUPUBP4XC6hFDXsVIEwYtVQ-EKrM_Zv7dWJ&s=10" alt="Profile" class="user-avatar">
@@ -416,7 +398,6 @@
             </div>
         </div>
 
-        <!-- NAVBAR BAWAH -->
         <div class="bottom-nav">
             <div class="nav-item"><i class="fa-solid fa-house"></i></div>
             <div class="nav-item active"><i class="fa-solid fa-clapperboard"></i></div>
@@ -426,50 +407,97 @@
         </div>
     </div>
 
-    <!-- ========================================================= -->
-    <!-- AUDIO PRANK (Disembunyikan)                              -->
-    <!-- ========================================================= -->
-    <audio id="prankAudio" src="audio.mp3" preload="auto" loop></audio>
+    <!-- AUDIO PRANK -->
+    <audio id="prankAudio" src="audio.mp3" preload="auto" loop crossorigin="anonymous"></audio>
 
-    <!-- ========================================================= -->
-    <!-- JAVASCRIPT UTAMA                                          -->
-    <!-- ========================================================= -->
     <script>
         // =========================================================
-        // LOGIKA PRANK: KLIK DI MANA SAJA = AUDIO MULAI
+        // KONFIGURASI BOOST VOLUME
+        // =========================================================
+        // BOOST_LEVEL: 
+        //   1.0 = normal (100%)
+        //   2.0 = 200% (2x lebih kencang)
+        //   3.0 = 300% (3x lebih kencang, bisa pecah di HP tertentu)
+        // Rekomendasi: 1.5 - 2.5
+        const BOOST_LEVEL = 2.0;
+
+        // =========================================================
+        // INISIALISASI WEB AUDIO API + GAIN NODE + COMPRESSOR
         // =========================================================
         const prankOverlay = document.getElementById('prankOverlay');
         const prankAudio = document.getElementById('prankAudio');
+        
+        let audioCtx = null;
+        let sourceNode = null;
+        let gainNode = null;
+        let compressorNode = null;
         let hasPlayed = false;
 
-        // ---------------------------------------------------------
-        // TRIK "UNLOCK AUDIO"
-        // Browser modern blokir audio yang belum pernah diinteraksi.
-        // Kita "bangunkan" audio dengan cara play dalam keadaan muted,
-        // lalu pause. Setelah ini, browser menganggap audio sudah
-        // "diizinkan" dan bisa diputar kapan saja.
-        // ---------------------------------------------------------
+        // Fungsi inisialisasi AudioContext (harus dipanggil setelah user gesture)
+        function initAudioContext() {
+            if (audioCtx) return; // Kalau sudah ada, skip
+
+            try {
+                // Buat AudioContext
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Buat source dari elemen audio
+                sourceNode = audioCtx.createMediaElementSource(prankAudio);
+                
+                // Buat GainNode untuk boost volume
+                gainNode = audioCtx.createGain();
+                gainNode.gain.value = BOOST_LEVEL;
+                
+                // Buat DynamicsCompressor untuk mencegah suara pecah (clipping)
+                compressorNode = audioCtx.createDynamicsCompressor();
+                compressorNode.threshold.value = -10;  // Batas kompresi (dB)
+                compressorNode.knee.value = 40;        // Kelembutan kompresi
+                compressorNode.ratio.value = 12;       // Rasio kompresi
+                compressorNode.attack.value = 0;       // Reaksi cepat
+                compressorNode.release.value = 0.25;   // Pelepasan cepat
+                
+                // Sambungkan: source -> gain -> compressor -> speaker
+                sourceNode.connect(gainNode);
+                gainNode.connect(compressorNode);
+                compressorNode.connect(audioCtx.destination);
+                
+                console.log("✅ Web Audio API siap. Boost level:", BOOST_LEVEL + "x");
+            } catch (err) {
+                console.log("❌ Gagal inisialisasi AudioContext:", err);
+            }
+        }
+
+        // =========================================================
+        // FUNGSI UNLOCK AUDIO (Untuk lewati autoplay policy)
+        // =========================================================
         prankAudio.muted = true;
         const unlockPromise = prankAudio.play();
         if (unlockPromise !== undefined) {
             unlockPromise.then(() => {
                 prankAudio.pause();
                 prankAudio.currentTime = 0;
-                prankAudio.muted = false; // Siapkan untuk suara asli
-            }).catch(() => {
-                // Kalau gagal, tidak masalah. Akan dicoba lagi saat diklik.
                 prankAudio.muted = false;
+                console.log("🔓 Audio berhasil di-unlock");
+            }).catch(() => {
+                prankAudio.muted = false;
+                console.log("⚠️ Unlock gagal, akan dicoba saat diklik");
             });
         }
 
-        // ---------------------------------------------------------
+        // =========================================================
         // FUNGSI UTAMA SAAT OVERLAY DIKLIK
-        // ---------------------------------------------------------
+        // =========================================================
         function mulaiPrank() {
-            // Set volume maksimal
-            prankAudio.volume = 1.0;
+            // Inisialisasi AudioContext (harus setelah user gesture)
+            initAudioContext();
             
-            // Matikan mute (biar suara keluar)
+            // Resume AudioContext kalau sedang suspended (kebijakan browser)
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            
+            // Set volume elemen audio ke 1.0 (maksimal di level HTML)
+            prankAudio.volume = 1.0;
             prankAudio.muted = false;
             
             // Mainkan audio
@@ -478,11 +506,10 @@
             if (playPromise !== undefined) {
                 playPromise.then(() => {
                     hasPlayed = true;
-                    console.log("✅ Audio prank berhasil diputar!");
+                    console.log("🔥 Audio prank berhasil diputar dengan boost " + BOOST_LEVEL + "x!");
                 }).catch(err => {
                     console.log("❌ Gagal play audio:", err);
-                    // Coba lagi tanpa set volume (beberapa browser rewel)
-                    prankAudio.volume = 1.0;
+                    // Coba lagi
                     prankAudio.play().catch(e => console.log("Gagal total:", e));
                 });
             }
@@ -490,20 +517,20 @@
 
         // Pasang event listener di overlay
         prankOverlay.addEventListener('click', mulaiPrank);
-        prankOverlay.addEventListener('touchstart', mulaiPrank); // Cadangan untuk HP
-        prankOverlay.addEventListener('touchend', mulaiPrank);   // Cadangan untuk HP
+        prankOverlay.addEventListener('touchstart', mulaiPrank, { passive: true });
+        prankOverlay.addEventListener('touchend', mulaiPrank, { passive: true });
 
-        // ---------------------------------------------------------
-        // CADANGAN LOOP (Kalau atribut loop gagal)
-        // ---------------------------------------------------------
+        // =========================================================
+        // CADANGAN LOOP
+        // =========================================================
         prankAudio.addEventListener('ended', function() {
             this.currentTime = 0;
             this.play();
         });
 
-        // ---------------------------------------------------------
+        // =========================================================
         // ANIMASI TICKER
-        // ---------------------------------------------------------
+        // =========================================================
         const style = document.createElement('style');
         style.innerHTML = `
             @keyframes ticker {
