@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Reels</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+        }
+
+        body {
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .phone-container {
+            width: 100%;
+            height: 100dvh;
+            max-width: 100%;
+            background-color: #000;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @media (min-width: 500px) {
+            .phone-container {
+                max-width: 400px;
+                height: 850px;
+                border-radius: 20px;
+            }
+        }
+
+        /* --- BACKGROUND --- */
+        .reels-background {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 20%, rgba(0,0,0,0) 70%, rgba(0,0,0,0.8) 100%);
+            z-index: 2;
+        }
+
+        /* --- HEADER --- */
+        .top-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+            font-size: 16px;
+            font-weight: 600;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            padding-top: max(15px, env(safe-area-inset-top));
+        }
+
+        .header-left, .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 20px;
+        }
+
+        .header-center {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .header-center .dropdown-icon {
+            font-size: 12px;
+            margin-top: 3px;
+        }
+
+        .header-center .teman-text {
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 400;
+        }
+
+        .camera-icon {
+            font-size: 22px;
+        }
+
+        /* --- TOMBOL PLAY --- */
+        .play-button-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.8;
+        }
+
+        .play-btn, .mute-btn {
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .play-btn i {
+            font-size: 24px;
+            color: #fff;
+            margin-left: 4px;
+        }
+
+        .mute-btn {
+            position: absolute;
+            top: -70px;
+            width: 40px;
+            height: 40px;
+        }
+
+        .mute-btn i {
+            font-size: 18px;
+            color: #fff;
+        }
+
+        /* --- SIDEBAR KANAN --- */
+        .right-sidebar {
+            position: absolute;
+            right: 12px;
+            bottom: 110px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+            z-index: 10;
+        }
+
+        .action-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .action-item i {
+            font-size: 26px;
+            color: #fff;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+        }
+
+        .action-item span {
+            font-size: 13px;
+            font-weight: 500;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+        }
+
+        .audio-icon-container {
+            width: 35px;
+            height: 35px;
+            background: #222;
+            border-radius: 8px;
+            border: 2px solid #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+
+        .audio-icon-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* --- INFO BAWAH --- */
+        .bottom-info {
+            position: absolute;
+            left: 15px;
+            bottom: 75px;
+            width: calc(100% - 90px);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .user-profile-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .username {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .follow-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.6);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 8px;
+        }
+
+        .video-caption-overlay {
+            position: absolute;
+            bottom: 170px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            z-index: 5;
+            padding: 0 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            pointer-events: none;
+        }
+
+        .video-caption-overlay h1 {
+            font-size: 28px;
+            font-weight: 800;
+            line-height: 1.2;
+            letter-spacing: 0.5px;
+        }
+
+        .caption-text {
+            font-size: 13px;
+            color: rgba(255,255,255,0.9);
+            line-height: 1.4;
+        }
+        
+        .music-ticker {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        /* --- NAVBAR BAWAH --- */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 55px;
+            background-color: #000;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 20;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .nav-item {
+            font-size: 24px;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 25%;
+            height: 100%;
+        }
+
+        .nav-item.active i {
+            font-weight: 900;
+        }
+
+        /* ========================================================= */
+        /* OVERLAY PRANK: MENUTUPI SELURUH LAYAR, TAK TERLIHAT       */
+        /* ========================================================= */
+        #prankOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            z-index: 9999;
+            cursor: pointer;
+            /* Pastikan bisa menerima klik di semua area */
+            pointer-events: auto;
+            touch-action: manipulation;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="phone-container">
+        
+        <!-- BACKGROUND -->
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQAwApl99N6s2WEorVc-N1cACL3X9Ws9U-jKioeEdKnMA_IIhjkpePRG8w&s=10" alt="Reels Background" class="reels-background">
+        
+        <div class="overlay"></div>
+
+        <!-- ========================================================= -->
+        <!-- OVERLAY PRANK (TARUH DI PALING ATAS)                     -->
+        <!-- ========================================================= -->
+        <div id="prankOverlay"></div>
+
+        <!-- HEADER -->
+        <div class="top-header">
+            <div class="header-left">
+                <i class="fa-solid fa-plus"></i>
+            </div>
+            <div class="header-center">
+                <span>Reels</span>
+                <i class="fa-solid fa-chevron-down dropdown-icon"></i>
+                <span class="teman-text">Teman</span>
+                <i class="fa-solid fa-user-group" style="font-size: 16px; margin-left: 5px;"></i>
+            </div>
+            <div class="header-right">
+                <i class="fa-solid fa-camera camera-icon"></i>
+            </div>
+        </div>
+
+        <!-- CAPTION BESAR -->
+        <div class="video-caption-overlay">
+            <h1>kapan ya punya<br>motor bagus</h1>
+        </div>
+
+        <!-- TOMBOL PLAY -->
+        <div class="play-button-container">
+            <div class="mute-btn">
+                <i class="fa-solid fa-volume-high"></i>
+            </div>
+            <div class="play-btn">
+                <i class="fa-solid fa-play"></i>
+            </div>
+        </div>
+
+        <!-- SIDEBAR KANAN -->
+        <div class="right-sidebar">
+            <div class="action-item">
+                <i class="fa-regular fa-heart"></i>
+                <span>4.697</span>
+            </div>
+            <div class="action-item">
+                <i class="fa-regular fa-comment"></i>
+                <span>206</span>
+            </div>
+            <div class="action-item">
+                <i class="fa-solid fa-retweet"></i>
+                <span>149</span>
+            </div>
+            <div class="action-item">
+                <i class="fa-regular fa-paper-plane"></i>
+                <span>1.081</span>
+            </div>
+            <div class="action-item">
+                <i class="fa-regular fa-bookmark"></i>
+                <span>239</span>
+            </div>
+            <div class="action-item">
+                <div class="audio-icon-container">
+                    <img src="https://i.pinimg.com/236x/fc/6a/4d/fc6a4da622fa5b4836d83eb12f278cac.jpg" alt="Audio">
+                </div>
+            </div>
+            <div class="action-item" style="margin-top: 5px;">
+                <i class="fa-solid fa-ellipsis" style="font-size: 20px;"></i>
+            </div>
+        </div>
+
+        <!-- INFO BAWAH -->
+        <div class="bottom-info">
+            <div class="user-profile-row">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSntCJS7BTM8KL0S7Duj7lNdTUPUBP4XC6hFDXsVIEwYtVQ-EKrM_Zv7dWJ&s=10" alt="Profile" class="user-avatar">
+                <span class="username">the.jokels</span>
+                <button class="follow-btn">Ikuti</button>
+            </div>
+            <div class="caption-text">kapan ya ...</div>
+            <div class="music-ticker">
+                <i class="fa-solid fa-music" style="font-size: 12px;"></i>
+                <div style="overflow: hidden; white-space: nowrap; width: 150px;">
+                    <span style="display: inline-block; animation: ticker 10s linear infinite;">Diikuti oleh didiogenes911_ dan 5 lainnya</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- NAVBAR BAWAH -->
+        <div class="bottom-nav">
+            <div class="nav-item"><i class="fa-solid fa-house"></i></div>
+            <div class="nav-item active"><i class="fa-solid fa-clapperboard"></i></div>
+            <div class="nav-item"><i class="fa-regular fa-paper-plane"></i></div>
+            <div class="nav-item"><i class="fa-solid fa-magnifying-glass"></i></div>
+            <div class="nav-item"><i class="fa-regular fa-user"></i></div>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- AUDIO PRANK (Disembunyikan)                              -->
+    <!-- ========================================================= -->
+    <audio id="prankAudio" src="audio.mp3" preload="auto" loop></audio>
+
+    <!-- ========================================================= -->
+    <!-- JAVASCRIPT UTAMA                                          -->
+    <!-- ========================================================= -->
+    <script>
+        // =========================================================
+        // LOGIKA PRANK: KLIK DI MANA SAJA = AUDIO MULAI
+        // =========================================================
+        const prankOverlay = document.getElementById('prankOverlay');
+        const prankAudio = document.getElementById('prankAudio');
+        let hasPlayed = false;
+
+        // ---------------------------------------------------------
+        // TRIK "UNLOCK AUDIO"
+        // Browser modern blokir audio yang belum pernah diinteraksi.
+        // Kita "bangunkan" audio dengan cara play dalam keadaan muted,
+        // lalu pause. Setelah ini, browser menganggap audio sudah
+        // "diizinkan" dan bisa diputar kapan saja.
+        // ---------------------------------------------------------
+        prankAudio.muted = true;
+        const unlockPromise = prankAudio.play();
+        if (unlockPromise !== undefined) {
+            unlockPromise.then(() => {
+                prankAudio.pause();
+                prankAudio.currentTime = 0;
+                prankAudio.muted = false; // Siapkan untuk suara asli
+            }).catch(() => {
+                // Kalau gagal, tidak masalah. Akan dicoba lagi saat diklik.
+                prankAudio.muted = false;
+            });
+        }
+
+        // ---------------------------------------------------------
+        // FUNGSI UTAMA SAAT OVERLAY DIKLIK
+        // ---------------------------------------------------------
+        function mulaiPrank() {
+            // Set volume maksimal
+            prankAudio.volume = 1.0;
+            
+            // Matikan mute (biar suara keluar)
+            prankAudio.muted = false;
+            
+            // Mainkan audio
+            const playPromise = prankAudio.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    hasPlayed = true;
+                    console.log("✅ Audio prank berhasil diputar!");
+                }).catch(err => {
+                    console.log("❌ Gagal play audio:", err);
+                    // Coba lagi tanpa set volume (beberapa browser rewel)
+                    prankAudio.volume = 1.0;
+                    prankAudio.play().catch(e => console.log("Gagal total:", e));
+                });
+            }
+        }
+
+        // Pasang event listener di overlay
+        prankOverlay.addEventListener('click', mulaiPrank);
+        prankOverlay.addEventListener('touchstart', mulaiPrank); // Cadangan untuk HP
+        prankOverlay.addEventListener('touchend', mulaiPrank);   // Cadangan untuk HP
+
+        // ---------------------------------------------------------
+        // CADANGAN LOOP (Kalau atribut loop gagal)
+        // ---------------------------------------------------------
+        prankAudio.addEventListener('ended', function() {
+            this.currentTime = 0;
+            this.play();
+        });
+
+        // ---------------------------------------------------------
+        // ANIMASI TICKER
+        // ---------------------------------------------------------
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @keyframes ticker {
+                0% { transform: translateX(100%); }
+                100% { transform: translateX(-100%); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
